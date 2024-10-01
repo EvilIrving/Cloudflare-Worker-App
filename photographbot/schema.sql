@@ -1,0 +1,12 @@
+DROP TABLE IF EXISTS photos;
+
+CREATE TABLE IF NOT EXISTS photos (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  url TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  isUsed BOOLEAN DEFAULT FALSE
+);
+
+CREATE INDEX idx_isUsed ON photos(isUsed);
+CREATE INDEX idx_created_at ON photos(created_at);

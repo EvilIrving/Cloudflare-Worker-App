@@ -1,0 +1,54 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "r2-worker"
+main = "src/index.js"
+compatibility_date = "2024-09-25"
+compatibility_flags = ["nodejs_compat"]
+
+[observability]
+enabled = true
+
+# Variable bindings. These are arbitrary, plaintext strings (similar to environment variables)
+# Docs:
+# - https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
+# Note: Use secrets to store sensitive data.
+# - https://developers.cloudflare.com/workers/configuration/secrets/
+[vars]
+TG_TOKEN = "8033103156:AAF6GGozkz7ImI63EC8atcSjkHFUYb6ztPY"
+R2_API_TOKEN = "II2XJwvlAGfxxsR_HTpTKd_j3O2X4Z-Gze9pnBQR"
+CHANNEL_ID = "-1002152374596"
+ACOUNT_ID = "747065b1adc6a0ad30cfc001dde4d491"
+BOT_INFO = """{
+  "id": 8033103156,
+  "is_bot": true,
+  "first_name": "masterait",
+  "username": "PortraitDailyBot",
+  "can_join_groups": true,
+  "can_read_all_group_messages": false,
+  "supports_inline_queries": false,
+  "can_connect_to_business": false,
+  "has_main_web_app": false
+}"""
+
+
+
+# Bind a D1 database. D1 is Cloudflare’s native serverless SQL database.
+# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#d1-databases
+[[d1_databases]]
+binding = "photo_db"
+database_name = "photos_d1"
+database_id = "b22ff9b3-5e4f-4432-95d2-9c1077e45944"
+
+
+# Bind a KV Namespace. Use KV as persistent storage for small key-value pairs.
+# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#kv-namespaces
+# [[kv_namespaces]]
+# binding = "MY_KV_NAMESPACE"
+# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+
+# Bind an R2 Bucket. Use R2 to store arbitrarily large blobs of data, such as files.
+# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#r2-buckets
+[[r2_buckets]]
+binding = "graph_bk"
+bucket_name = "photos"
+
