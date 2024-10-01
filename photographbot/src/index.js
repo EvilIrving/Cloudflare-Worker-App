@@ -35,6 +35,7 @@ export default {
 			await photosManager.deleteById(Number(id));
 			await ctx.reply('Deleted');
 		});
+
 		bot.command('sendpic', async (ctx) => {
 			// 发送随机三张图片给 channel 或 bot
 			const photos = await photosManager.getThreeRandomUnusedAndMark();
@@ -92,4 +93,6 @@ export default {
 			timeoutMilliseconds: 1000_000,
 		})(request);
 	},
+
+	async schedule
 };
