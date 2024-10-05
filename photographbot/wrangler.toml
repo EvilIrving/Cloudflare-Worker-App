@@ -31,8 +31,8 @@ BOT_INFO = """{
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#d1-databases
 [[d1_databases]]
 binding = "graph_db"
-database_name = "graph"
-database_id = "b22ff9b3-5e4f-4432-95d2-9c1077e45944"
+database_name = "graph_db"
+database_id = "ae855eb0-5830-4bbe-b245-fae44f560140"
 
 
 # Bind a KV Namespace. Use KV as persistent storage for small key-value pairs.
@@ -46,5 +46,8 @@ database_id = "b22ff9b3-5e4f-4432-95d2-9c1077e45944"
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#r2-buckets
 [[r2_buckets]]
 binding = "graph_bk"
-bucket_name = "graph"
+bucket_name = "photos"
 
+# triggers for 12am every day
+[triggers]
+crons = ["0 0 * * *"]

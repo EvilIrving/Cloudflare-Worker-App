@@ -1,3 +1,4 @@
+import { r2_path } from './constant';
 // CloudflareR2 class definition
 class CloudflareR2 {
 	constructor(bucket) {
@@ -7,7 +8,7 @@ class CloudflareR2 {
 	async put(key, data) {
 		await this.bucket.put(key, data);
 		// 拼接 Cloudflare R2 链接
-		const file_url_r2 = `https://pub-9350f14105fb48d49bb0de3e2822bc9e.r2.dev/${key}`;
+		const file_url_r2 = `${r2_path}${key}`;
 		return file_url_r2;
 	}
 

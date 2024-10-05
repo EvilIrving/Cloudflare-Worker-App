@@ -7,3 +7,17 @@ export function initBot(env) {
 	bot = new Bot(env.TG_TOKEN, { botInfo: JSON.parse(env.BOT_INFO) });
 	return bot;
 }
+
+
+// let bot;
+
+// export function setBot(bot) {
+// 	bot = bot;
+// }
+
+// export function getBot() {
+// 	if (!bot) {
+// 		throw new Error('Bot not set');
+// 	}
+// 	return bot;
+// }

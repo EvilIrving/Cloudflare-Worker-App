@@ -1,4 +1,4 @@
-import { webhookCallback } from 'grammy';
+import { webhookCallback, InputFile } from 'grammy';
 import { initR2 } from './r2';
 import { initBot } from './bot';
 import { setPhotosManager } from './photos-manager';
@@ -16,13 +16,11 @@ export default {
 			await ctx.reply('Hello, world!');
 
 			// setCommands
-			// bot.setMyCommands([
-			// 	{ command: 'delete', description: 'Delete a photo by id' },
-			// 	{ command: 'sendpic', description: 'Send three random unused photos' },
-			// 	{ command: 'list', description: 'List all photos' },
-			// 	{ command: 'reset', description: 'Reset R2 and D1' },
-			// 	{ command: 'insertfromr2', description: 'Insert all photos from R2 to D1' },
-			// ]);
+			// delete
+			// sendpic
+			//
+
+			// bot.setMyCommands([ ]);
 		});
 
 		// 无关消息处理
@@ -40,29 +38,25 @@ export default {
 			// 发送随机三张图片给 channel 或 bot
 			const photos = await photosManager.getThreeRandomUnusedAndMark();
 
-			if (photos.length === 0) {
+			if (photos && photos.length === 0) {
 				await ctx.reply('No unused photos');
 			}
 			//  发送图片给 channel 或 bot
 			for (const photo of photos) {
 				await ctx.replyWithPhoto(photo.url);
-				// await bot.api.sendPhoto({ chat_id: ctx.chat.id, photo: photo.url });
+				await bot.api.sendPhoto(env.CHNENELID, new InputFile({ url: photo.url }));
 			}
 		});
-		bot.command('list', async (ctx) => {
-			await ctx.reply('Listed');
-		});
-		bot.command('reset', async (ctx) => {
-			// 重置 R2 图片库,删除所有图片数据, 重置数据库 D1
-			await photosManager.deleteAllFromR2();
-			await ctx.reply('Resetted');
-		});
 
-		bot.command('insertfromr2', async (ctx) => {
-			// 从 R2 图片库导入图片数据, 并插入数据库 D1
-			await photosManager.insertAllFromBucket();
-			await ctx.reply('Inserted');
-		});
+		//  重置数据库 D1
+		// bot.command('resetdb', async (ctx) => {
+		// 	if (ctx.message.from.id === env.ADMINID) {
+		// 		await photosManager.resetDB();
+		// 		await ctx.reply('Resetted');
+		// 	} else {
+		// 		await ctx.reply('Sorry, No permission');
+		// 	}
+		// });
 
 		bot.on('message:photo', async (ctx) => {
 			console.log('photo');
@@ -90,9 +84,26 @@ export default {
 			onTimeout: (ctx) => {
 				console.log('Timeout:', ctx.update.update_id);
 			},
-			timeoutMilliseconds: 1000_000,
+			timeoutMilliseconds: 100_000,
 		})(request);
 	},
 
-	async schedule
+	async scheduled(controller, env, ctx) {
+		// 初始化 bot
+		const bot = initBot(env);
+		// 初始化图片管理器
+		const photosManager = setPhotosManager(env);
+
+		// 发送随机三张图片给 channel 或 bot
+		const photos = await photosManager.getThreeRandomUnusedAndMark();
+
+		if (photos.length === 0) {
+			await bot.api.sendMessage(env.CHNENELID, 'No unused photos');
+		}
+		//  发送图片给 channel 或 bot
+		for (const photo of photos) {
+			await bot.api.sendPhoto(env.CHNENELID, new InputFile({ url: photo.url }));
+		}
+		return webhookCallback(bot, 'cloudflare-mod');
+	},
 };
