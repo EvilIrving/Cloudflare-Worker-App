@@ -34,6 +34,7 @@ export default {
 			await ctx.reply('Deleted');
 		});
 
+		// 手动 发送图片
 		bot.command('sendpic', async (ctx) => {
 			// 发送随机三张图片给 channel 或 bot
 			const photos = await photosManager.getThreeRandomUnusedAndMark();
