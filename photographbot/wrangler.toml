@@ -48,6 +48,7 @@ database_id = "ae855eb0-5830-4bbe-b245-fae44f560140"
 binding = "graph_bk"
 bucket_name = "photos"
 
-# triggers for 12am every day
+# triggers for 12am every day,
 [triggers]
-crons = ["0 0 * * *"]
+crons = ["0 0/3 * * *"]
+# crons = ["0 0 * * *"]

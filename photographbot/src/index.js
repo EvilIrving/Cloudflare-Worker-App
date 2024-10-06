@@ -28,26 +28,36 @@ export default {
 		// 	await ctx.reply('I received your message!');
 		// });
 
-		bot.command('delete', async (ctx) => {
-			const id = ctx.message.text.split(' ')[1];
-			await photosManager.deleteById(Number(id));
-			await ctx.reply('Deleted');
+
+
+		// 发送 3 张图片
+		bot.command('send3pic', async () => {
+			const photos = await photosManager.getRandomUnusedAndMark(3);
+			sendPhoto(photos);
+		});
+		// 发送 10 张图片
+		bot.command('send10pic', async () => {
+			const photos = await photosManager.getRandomUnusedAndMark(10);
+			sendPhoto(photos);
+		});
+		// 发送 20 张图片
+		bot.command('send20pic', async () => {
+			const photos = await photosManager.getRandomUnusedAndMark(20);
+			sendPhoto(photos);
 		});
 
-		// 手动 发送图片
-		bot.command('sendpic', async (ctx) => {
-			// 发送随机三张图片给 channel 或 bot
-			const photos = await photosManager.getThreeRandomUnusedAndMark();
-
+		async function sendPhoto(photos) {
 			if (photos && photos.length === 0) {
-				await ctx.reply('No unused photos');
+				await bot.api.sendMessage(env.CHNENELID, 'No unused photos');
 			}
 			//  发送图片给 channel 或 bot
 			for (const photo of photos) {
 				await ctx.replyWithPhoto(photo.url);
-				await bot.api.sendPhoto(env.CHNENELID, new InputFile({ url: photo.url }));
+				if(ctx.message.from.id === env.ADMINID){
+					await bot.api.sendPhoto(env.CHNENELID, new InputFile({ url: photo.url }));
+				}
 			}
-		});
+		}
 
 		//  重置数据库 D1
 		// bot.command('resetdb', async (ctx) => {
@@ -85,7 +95,7 @@ export default {
 			onTimeout: (ctx) => {
 				console.log('Timeout:', ctx.update.update_id);
 			},
-			timeoutMilliseconds: 100_000,
+			timeoutMilliseconds: 20_000,
 		})(request);
 	},
 
