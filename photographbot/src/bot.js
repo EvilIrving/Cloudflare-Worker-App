@@ -1,5 +1,7 @@
 import { Bot } from 'grammy';
-export let bot = null;
+
+let bot = null;
+
 export function initBot(env) {
 	if (bot) {
 		return bot;
@@ -8,16 +10,4 @@ export function initBot(env) {
 	return bot;
 }
 
-
-// let bot;
-
-// export function setBot(bot) {
-// 	bot = bot;
-// }
-
-// export function getBot() {
-// 	if (!bot) {
-// 		throw new Error('Bot not set');
-// 	}
-// 	return bot;
-// }
+export { bot };

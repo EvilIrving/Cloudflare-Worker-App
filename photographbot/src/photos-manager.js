@@ -3,63 +3,62 @@
 class PhotosManager {
 	constructor(env) {
 		this.env = env;
+		this.db = env.graph_db;
 	}
 
 	// 插入单个图片数据
 	async insertSingle(name, url) {
-		await this.env.graph_db
-			.prepare(
-				`
-      INSERT INTO photos (name, url, isUsed)
-      VALUES (?, ?, false)
-    `
-			)
-			.bind(name, url)
-			.run();
+		const stmt = this.db.prepare(`
+			INSERT INTO photos (name, url, isUsed)
+			VALUES (?, ?, false)
+		`);
+		await stmt.bind(name, url).run();
 	}
 
-	// 随机查询 3 张未使用的图片 并更新状态为已使用
+	// 随机查询未使用的图片 并更新状态为已使用
 	async getRandomUnusedAndMark(number = 3) {
-		// TODO 这里应该先检查是否有 photos 表 , 如果没有这张表 则创建
+		// await this.initializeTable();
 
-		// 首先查询3张未使用的图片
-		const { results } = await this.env.graph_db
-			.prepare(
-				`
-				SELECT id, name, url, created_at
-				FROM photos
-				WHERE isUsed = false
-				ORDER BY RANDOM()
-				LIMIT ${number}
-			`
-			)
-			.all();
+		const { results } = await this.db.prepare(`
+			SELECT id, name, url, created_at
+			FROM photos
+			WHERE isUsed = false
+			ORDER BY RANDOM()
+			LIMIT ?
+		`).bind(number).all();
 
 		if (results.length > 0) {
-			// 准备更新语句
-			const updateStmt = this.env.graph_db.prepare(`
+			const updateStmt = this.db.prepare(`
 				UPDATE photos
 				SET isUsed = true
 				WHERE id = ?
 			`);
 
-			// 创建一个批处理操作
-			const batch = results.map((photo) => updateStmt.bind(photo.id));
-
-			// 执行批处理
-			await this.env.graph_db.batch(batch);
+			const batch = results.map(photo => updateStmt.bind(photo.id));
+			await this.db.batch(batch);
 		}
 
 		return results;
 	}
+
+	async initializeTable() {
+		await this.db.exec(`
+			CREATE TABLE IF NOT EXISTS photos (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				name TEXT NOT NULL,
+				url TEXT NOT NULL,
+				isUsed BOOLEAN DEFAULT FALSE,
+				created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+			)
+		`);
+	}
 }
 
-export let photosManager = null;
+let photosManager = null;
 
 export function setPhotosManager(env) {
-	if (photosManager) {
-		return photosManager;
+	if (!photosManager) {
+		photosManager = new PhotosManager(env);
 	}
-	photosManager = new PhotosManager(env);
 	return photosManager;
 }
