@@ -66,8 +66,12 @@ export default {
 		if (photos.length === 0) {
 			await bot.api.sendMessage(env.CHNENELID, 'No unused photos');
 		} else {
-			for (const photo of photos) {
-				await bot.api.sendPhoto(env.CHNENELID, new InputFile({ url: photo.url }));
+			for (let index = 0; index < photos.length; index += 5) {
+				const group = photos.slice(index, index + 5);
+				await bot.api.sendMediaGroup(
+					env.CHNENELID,
+					group.map((photo) => ({ type: 'photo', media: new InputFile({ url: photo.url }) }))
+				);
 			}
 		}
 

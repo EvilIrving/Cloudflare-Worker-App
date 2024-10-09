@@ -74,9 +74,9 @@ async function resetR2(bucket) {
   let cursor;
   do {
     const listed = await bucket.list({ cursor });
-    for (const object of listed.objects) {
-      await this.bucket.delete(object.key);
-    }
+    console.log(`Deleting ${listed.objects.length} objects...`);
+    const keys = listed.objects.map(object => object.key); 
+    await bucket.delete([keys]);
     cursor = listed.cursor;
   } while (cursor);
   return true;

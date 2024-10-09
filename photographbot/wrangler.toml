@@ -50,5 +50,5 @@ bucket_name = "photos"
 
 # triggers for 12am every day,
 [triggers]
-crons = ["0 0/3 * * *"]
+crons = ["0 0/6 * * *"]
 # crons = ["0 0 * * *"]
