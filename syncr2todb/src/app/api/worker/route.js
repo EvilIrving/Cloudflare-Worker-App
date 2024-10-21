@@ -67,6 +67,15 @@ async function syncR2ToDB(bucket, db) {
   stmt.finalize();
   return true;
 }
+
+// 新增的代码：每隔一分钟调用一次 syncR2ToDB 方法
+async function periodicSync(bucket, db) {
+  while (true) {
+    await syncR2ToDB(bucket, db);
+    await sleep(60 * 1000); // 每隔一分钟调用一次
+  }
+}
+
 async function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
