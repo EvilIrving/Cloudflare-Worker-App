@@ -1,0 +1,29 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "ruozhiba"
+main = "src/index.ts"
+compatibility_date = "2024-10-22"
+compatibility_flags = ["nodejs_compat"]
+
+# Workers Logs
+# Docs: https://developers.cloudflare.com/workers/observability/logs/workers-logs/
+# Configuration: https://developers.cloudflare.com/workers/observability/logs/workers-logs/#enable-workers-logs
+[observability]
+enabled = true
+
+# Variable bindings. These are arbitrary, plaintext strings (similar to environment variables)
+# Docs:
+# - https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
+# Note: Use secrets to store sensitive data.
+# - https://developers.cloudflare.com/workers/configuration/secrets/
+[vars]
+CHANNELID = "-1002328117588"
+
+[[d1_databases]]
+binding = "ruozi_db"
+database_name = "ruozhi"
+database_id = "e8b370d2-95aa-4ac9-b54c-a064ba0667fd"
+
+
+[triggers]
+crons = ["0 */4 * * *"]  # 添加了每天每隔 4 个小时的 cron
+
