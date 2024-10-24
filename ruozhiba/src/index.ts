@@ -16,19 +16,57 @@ import { Bot, Context, webhookCallback } from 'grammy';
 interface Env {
 	BOT_TOKEN: string;
 	CHANNELID: string;
+	ruozi_db: D1Database;
 }
 
-interface Ruozi {
-	code: string;
-	ruozi: string;
+interface RuoziData {
+	author: string;
+	content: string;
+	l_num: number;
+	ctime: string;
 }
+// 随机查询未使用的图片 并更新状态为已使用
+async function getRandomUnusedAndMark(db: D1Database, number = 3): Promise<Record<string, unknown>[]> {
+	// 修改返回类型为 Promise
+	const { results } = await db
+		.prepare(
+			`
+		SELECT id, author, content, l_num, ctime
+		FROM ruozhi
+		WHERE isUsed = false
+		ORDER BY RANDOM()
+		LIMIT ?
+	`
+		)
+		.bind(number)
+		.all();
+
+	if (results.length > 0) {
+		const updateStmt = db.prepare(`
+			UPDATE ruozhi
+			SET isUsed = true
+			WHERE id = ?
+		`);
+
+		const batch = results.map((photo) => updateStmt.bind(photo.id));
+		await db.batch(batch);
+	}
+
+	return results;
+}
+
 async function fetchAndSendMessages(ctx: Context, bot: Bot, env: Env) {
 	for (let i = 0; i < 3; i++) {
-		const response = await fetch('https://www.7ed.net/ruozi/api');
-		const data: Ruozi = await response.json();
-		if (data.code) {
-			await ctx.reply(data.ruozi);
-			await bot.api.sendMessage(env.CHANNELID, data.ruozi);
+		const data: Record<string, unknown>[] = await getRandomUnusedAndMark(env.ruozi_db);
+
+		if (data.length > 0) {
+			data.forEach(async (item) => {
+				// 确保 item.content 是字符串类型
+				await ctx.reply(`「${item.content}」—— ${item.author}`);
+				await bot.api.sendMessage(env.CHANNELID, `「${item.content}」—— ${item.author}`);
+			});
+		} else {
+			await ctx.reply('没有更多了');
 		}
 	}
 }
