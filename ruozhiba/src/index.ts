@@ -19,19 +19,13 @@ interface Env {
 	ruozi_db: D1Database;
 }
 
-interface RuoziData {
-	author: string;
-	content: string;
-	l_num: number;
-	ctime: string;
-}
 // 随机查询未使用的图片 并更新状态为已使用
 async function getRandomUnusedAndMark(db: D1Database, number = 3): Promise<Record<string, unknown>[]> {
 	// 修改返回类型为 Promise
 	const { results } = await db
 		.prepare(
 			`
-		SELECT id, author, content, l_num, ctime
+		SELECT id, author, content, abs
 		FROM ruozhi
 		WHERE isUsed = false
 		ORDER BY RANDOM()
@@ -48,26 +42,37 @@ async function getRandomUnusedAndMark(db: D1Database, number = 3): Promise<Recor
 			WHERE id = ?
 		`);
 
-		const batch = results.map((photo) => updateStmt.bind(photo.id));
+		const batch = results.map((item) => updateStmt.bind(item.id));
 		await db.batch(batch);
 	}
 
 	return results;
 }
 
-async function fetchAndSendMessages(ctx: Context, bot: Bot, env: Env) {
-	for (let i = 0; i < 3; i++) {
-		const data: Record<string, unknown>[] = await getRandomUnusedAndMark(env.ruozi_db);
+async function fetchAndSendMessages(bot: Bot, env: Env, ctx?: Context) {
+	const data: Record<string, unknown>[] = await getRandomUnusedAndMark(env.ruozi_db, 5);
 
-		if (data.length > 0) {
-			data.forEach(async (item) => {
-				// 确保 item.content 是字符串类型
-				await ctx.reply(`「${item.content}」—— ${item.author}`);
-				await bot.api.sendMessage(env.CHANNELID, `「${item.content}」—— ${item.author}`);
-			});
-		} else {
+	if (data.length > 0) {
+
+		for (const item of data) {
+			let msg = ''
+			if(item.abs ){
+				msg = `${item.content}
+abs: ${item.abs}
+--- ${item.author}`
+			} else {
+				msg = `${item.content}`;
+			}
+			if (ctx) {
+				await ctx.reply(msg);
+			}
+			await bot.api.sendMessage(env.CHANNELID, msg);
+		}
+	} else {
+		if (ctx) {
 			await ctx.reply('没有更多了');
 		}
+		await bot.api.sendMessage(env.CHANNELID, '没有更多了');
 	}
 }
 export default {
@@ -77,7 +82,7 @@ export default {
 		bot.command('start', (ctx: Context) => ctx.reply('Hello!'));
 
 		bot.command('ruozhiba', async (ctx: Context) => {
-			await fetchAndSendMessages(ctx, bot, env);
+			await fetchAndSendMessages(bot, env, ctx);
 		});
 
 		bot.command('tongbu', async (ctx: Context) => {
@@ -88,9 +93,7 @@ export default {
 	},
 	async scheduled(event: ScheduledEvent, env: Env) {
 		const bot = new Bot(env.BOT_TOKEN);
-		bot.command('ruozhiba', async (ctx: Context) => {
-			await fetchAndSendMessages(ctx, bot, env);
-		});
+		await fetchAndSendMessages(bot, env);
 		return webhookCallback(bot, 'cloudflare-mod');
 	},
 };

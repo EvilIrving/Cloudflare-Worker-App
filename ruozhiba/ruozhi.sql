@@ -1,10 +1,13 @@
 
 DROP TABLE IF EXISTS ruozhi;
 CREATE TABLE ruozhi (
-    author TEXT NOT NULL,
-    content TEXT NOT NULL,
-    l_num INTEGER NOT NULL,
-    ctime TEXT NOT NULL
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    author TEXT NOT NULL DEFAULT "",
+    content TEXT NOT NULL DEFAULT "",
+	abs TEXT NOT NULL DEFAULT "",
+    l_num INTEGER NOT NULL DEFAULT 1,
+    ctime TEXT NOT NULL DEFAULT "",
+    isUsed BOOLEAN NOT NULL DEFAULT false
 );
 
 INSERT INTO ruozhi (author, content, l_num, ctime) VALUES (
